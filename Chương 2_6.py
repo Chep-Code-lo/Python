@@ -1,0 +1,5 @@
+a, b, c, d, e = map(float, input().split())
+max_value = max(a, b, c, d, e)
+print(max_value)
+min_value = min(a, b, c, d, e)
+print(min_value)
