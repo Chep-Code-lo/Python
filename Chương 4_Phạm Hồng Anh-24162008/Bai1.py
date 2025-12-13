@@ -5,7 +5,7 @@ def calc(n):
 def main():
     n = int(input())
     meter = n * 1000
-    so_luong = meter // 140
+    so_luong = meter / 140
     print(calc(so_luong))
 if __name__ == "__main__":
     main()
