@@ -3,9 +3,9 @@ def combine_rooms(room_1, room_2):
     ans = []
     for a, b in zip(room_1, room_2):
         if a > 0:
-            ans.append(int(a))
+            ans.append(a)
         elif b > 0:
-            ans.append(int(b))
+            ans.append(b)
         else:
             ans.append(None)
     return np.array(ans)
