@@ -361,5 +361,5 @@ salary = predict_salary('Data Scientist', 'Senior', 'Full-time', 'Tech', 'Large'
 
 ---
 
-**Ngày thực hiện:** December 2024  
+**Ngày thực hiện:** December 2025  
 **Công cụ:** Python, Jupyter Notebook, VS Code
