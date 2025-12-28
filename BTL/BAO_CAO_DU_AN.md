@@ -182,7 +182,6 @@ df['job_title'].value_counts().head(8).plot(kind='barh', color='steelblue')
 plt.title('Top Vị Trí Công Việc', fontweight='bold')
 plt.ylabel('')
 plt.tight_layout()
-plt.savefig('images/job_distribution.png')
 ```
 **Phân tích và Ý nghĩa:**
 Biểu đồ thanh ngang cho thấy sự phân bố số lượng việc làm theo chức danh.
@@ -199,7 +198,6 @@ df.groupby('job_title')['salary'].mean().sort_values().tail(8).plot(kind='barh',
 plt.title('Lương TB Theo Vị Trí', fontweight='bold')
 plt.ylabel('')
 plt.tight_layout()
-plt.savefig('images/salary_by_job.png')
 ```
 **Phân tích và Ý nghĩa:**
 Biểu đồ này so sánh mức lương trung bình giữa các vị trí công việc phổ biến.
@@ -216,7 +214,6 @@ df['experience_level'].value_counts().plot(kind='pie', autopct='%1.1f%%', colors
 plt.title('Phân Bố Kinh Nghiệm', fontweight='bold')
 plt.ylabel('')
 plt.tight_layout()
-plt.savefig('images/experience_distribution.png')
 ```
 **Phân tích và Ý nghĩa:**
 Biểu đồ tròn thể hiện tỷ lệ phần trăm yêu cầu kinh nghiệm.
@@ -234,7 +231,6 @@ plt.title('Lương TB Theo Kinh Nghiệm', fontweight='bold')
 plt.xlabel('')
 plt.xticks(rotation=0)
 plt.tight_layout()
-plt.savefig('images/salary_by_experience.png')
 ```
 **Phân tích và Ý nghĩa:**
 Biểu đồ cột so sánh mức lương trung bình theo cấp độ kinh nghiệm.
