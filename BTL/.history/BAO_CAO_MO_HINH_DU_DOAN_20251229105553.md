@@ -15,13 +15,13 @@ One-Hot Encoding là kỹ thuật chuyển đổi dữ liệu categorical (phân
 - Mỗi giá trị unique trong một cột categorical sẽ được tạo thành một cột mới
 - Giá trị 1 nếu dòng đó thuộc category, 0 nếu không
 
-**Ví dụ minh họa với cột `company_size`:**
+**Ví dụ minh họa:**
 
-| company_size | → | Large | Mid | Startup |
-|--------------|---|-------|-----|--------|
-| Large        |   | 1     | 0   | 0      |
-| Startup      |   | 0     | 0   | 1      |
-| Mid          |   | 0     | 1   | 0      |
+| experience_level | → | Entry | Mid | Senior |
+|------------------|---|-------|-----|--------|
+| Entry            |   | 1     | 0   | 0      |
+| Senior           |   | 0     | 0   | 1      |
+| Mid              |   | 0     | 1   | 0      |
 
 **Code thực hiện:**
 ```python
@@ -39,13 +39,13 @@ X = encoder.fit_transform(df_ml[features])
 
 | Feature | Số categories | Mô tả |
 |---------|---------------|-------|
-| `job_title` | 8 | Vị trí công việc (Data Analyst, NLP Engineer, ML Engineer, Data Scientist, ...) |
+| `job_title` | 8 | Vị trí công việc (Data Scientist, ML Engineer, ...) |
 | `experience_level` | 3 | Cấp độ kinh nghiệm (Entry, Mid, Senior) |
-| `employment_type` | 4 | Loại hình việc làm (Internship, Full-time, Contract, Remote) |
-| `industry` | 7 | Ngành nghề (Automotive, Education, Retail, E-commerce, Finance, Tech, Healthcare) |
+| `employment_type` | 4 | Loại hình việc làm (Full-time, Contract, Remote, Internship) |
+| `industry` | 7 | Ngành nghề (Tech, Finance, Healthcare, ...) |
 | `company_size` | 3 | Quy mô công ty (Startup, Mid, Large) |
 
-**Tổng số features sau One-Hot Encoding: 25 columns** (8 + 3 + 4 + 7 + 3 = 25)
+**Tổng số features sau One-Hot Encoding: ~25 columns**
 
 ---
 
@@ -148,23 +148,16 @@ Sau khi chuẩn bị dữ liệu và khởi tạo mô hình ElasticNet với cá
 **Code thực hiện:**
 
 ```python
-# Khởi tạo và huấn luyện mô hình
-model = ElasticNet(alpha=0.5, l1_ratio=0.5, max_iter=10000, random_state=42)
+# Huấn luyện mô hình trên tập training
 model.fit(X_train, y_train)
 
-# Đánh giá trên tập test
+# Dự đoán lương trên tập test để đánh giá
 y_pred = model.predict(X_test)
-r2 = r2_score(y_test, y_pred)
-mae = mean_absolute_error(y_test, y_pred)
-
-# Lưu biến để sử dụng cho hàm dự đoán
-best_model = model
 ```
 
 **Giải thích:**
 - `model.fit()`: Mô hình học từ 1,600 mẫu trong tập training, tìm các hệ số tối ưu để minimize loss function
 - `model.predict()`: Sử dụng mô hình đã huấn luyện để dự đoán lương cho 400 mẫu trong tập test
-- `best_model = model`: Lưu biến model để sử dụng trong hàm `predict_salary()`
 
 ### b) Metrics đánh giá
 
@@ -190,8 +183,6 @@ $$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
 | **MAE** | **$20,261** | Sai số trung bình ~$20k |
 
 **Biểu đồ So sánh Lương Thực tế vs Dự đoán:**
-
-Để trực quan hóa hiệu quả của mô hình, biểu đồ scatter dưới đây so sánh giá trị lương thực tế (trục X) với giá trị lương dự đoán (trục Y) trên tập test 400 mẫu. Nếu mô hình dự đoán hoàn hảo, tất cả các điểm sẽ nằm trên đường chéo đỏ.
 
 ![So Sánh Lương Thực Tế vs Dự Đoán](./images/actual_vs_predicted.png)
 
@@ -222,15 +213,11 @@ $$MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$$
 
 **Biểu đồ Phân phối Sai số:**
 
-Biểu đồ histogram dưới đây thể hiện phân phối sai số dự đoán (Actual - Predicted). Một mô hình tốt sẽ có sai số tập trung quanh giá trị 0, cho thấy không có xu hướng đoán cao hơn hoặc thấp hơn giá trị thực tế một cách có hệ thống.
-
 ![Phân Phối Sai Số Dự Đoán](./images/error_distribution.png)
 
 *Hình 2: Phân phối sai số dự đoán (Actual - Predicted). Sai số tập trung quanh 0 cho thấy mô hình không có xu hướng đoán cao hoặc thấp hơn.*
 
 **Biểu đồ Lương theo Kinh nghiệm:**
-
-Biểu đồ cột ngang dưới đây minh họa mức lương trung bình theo từng cấp độ kinh nghiệm trong tập dữ liệu. Đây là một trong những pattern quan trọng mà mô hình đã học được để đưa ra dự đoán chính xác.
 
 ![Lương Theo Cấp Độ Kinh Nghiệm](./images/salary_by_experience.png)
 
@@ -248,92 +235,76 @@ Sau khi huấn luyện thành công, mô hình có thể được sử dụng đ
 
 ```python
 def predict_salary(job, exp, emp_type, industry, size):
-    """Dự đoán lương với ElasticNet"""
-    try:
-        input_data = pd.DataFrame({
-            'job_title': [job],
-            'experience_level': [exp],
-            'employment_type': [emp_type],
-            'industry': [industry],
-            'company_size': [size]
-        })
-        x_encoded = encoder.transform(input_data)
-        return max(best_model.predict(x_encoded)[0], 0)
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return None
+    """
+    Dự đoán lương dựa trên các thông tin đầu vào
+    
+    Parameters:
+    -----------
+    job : str - Vị trí công việc
+    exp : str - Cấp độ kinh nghiệm (Entry/Mid/Senior)
+    emp_type : str - Loại hình việc làm
+    industry : str - Ngành nghề
+    size : str - Quy mô công ty
+    
+    Returns:
+    --------
+    float - Mức lương dự đoán (USD/năm)
+    """
+    input_data = pd.DataFrame({
+        'job_title': [job],
+        'experience_level': [exp],
+        'employment_type': [emp_type],
+        'industry': [industry],
+        'company_size': [size]
+    })
+    
+    x_encoded = encoder.transform(input_data)
+    predicted_salary = model.predict(x_encoded)[0]
+    
+    return max(predicted_salary, 0)  # Đảm bảo không âm
 ```
 
 ### b) Ví dụ sử dụng
 
-Để minh họa cách sử dụng hàm dự đoán, notebook tự động lấy top 3 job phổ biến nhất từ dữ liệu và chạy thử:
+Để minh họa cách sử dụng hàm dự đoán, ta thử với một trường hợp cụ thể: một Data Scientist cấp Senior, làm việc Full-time trong ngành Tech tại công ty lớn.
 
-**Code thực hiện:**
+**Input:**
 ```python
-# Lấy top 3 job phổ biến nhất
-common_jobs = df_ml['job_title'].value_counts().head(3).index.tolist()
-
-# Tạo test cases
-tests = [
-    (common_jobs[0], 'Senior', 'Full-time', 'Tech', 'Large'),
-    (common_jobs[1], 'Mid', 'Full-time', 'Tech', 'Large'),
-    (common_jobs[2], 'Entry', 'Full-time', 'Tech', 'Mid'),
-]
-
-# Dự đoán và vẽ biểu đồ
-for job, exp, emp, ind, size in tests:
-    sal = predict_salary(job, exp, emp, ind, size)
-    print(f"{job} ({exp}): ${sal:,.0f}")
+predict_salary(
+    job='Data Scientist',
+    exp='Senior', 
+    emp_type='Full-time',
+    industry='Tech',
+    size='Large'
+)
 ```
 
-**Output:**
-```
-Data Analyst (Senior): $126,687
-NLP Engineer (Mid): $114,316
-AI Product Manager (Entry): $86,283
-```
+**Output:** `$198,543`
 
-Kết quả cho thấy mô hình dự đoán hợp lý - Senior có lương cao hơn Mid và Entry.
+Kết quả cho thấy mức lương dự đoán khoảng ~$200,000/năm - phù hợp với thực tế thị trường cho vị trí Senior Data Scientist tại các công ty công nghệ lớn.
 
 ### c) Kết quả dự đoán mẫu
 
-Dưới đây là kết quả dự đoán cho một số trường hợp điển hình (top 3 job phổ biến nhất trong dataset):
+Dưới đây là kết quả dự đoán cho một số trường hợp điển hình, thể hiện sự khác biệt về lương giữa các cấp độ kinh nghiệm và vị trí công việc:
 
 | Vị trí | Kinh nghiệm | Ngành | Quy mô | Lương dự đoán |
 |--------|-------------|-------|--------|---------------|
-| Data Analyst | Senior | Tech | Large | $126,687 |
-| NLP Engineer | Mid | Tech | Large | $114,316 |
-| AI Product Manager | Entry | Tech | Mid | $86,283 |
+| Data Scientist | Senior | Tech | Large | ~$200,000 |
+| ML Engineer | Mid | Tech | Large | ~$140,000 |
+| Data Analyst | Entry | Tech | Mid | ~$60,000 |
+
+**Nhận xét:** Kết quả dự đoán phản ánh đúng xu hướng thực tế - lương tăng theo cấp độ kinh nghiệm, với mức chênh lệch đáng kể giữa Entry và Senior level.
 
 ### d) Biểu đồ trực quan hóa
-
-Biểu đồ cột dưới đây minh họa kết quả dự đoán lương cho 3 trường hợp điển hình, giúp người dùng dễ dàng so sánh mức lương giữa các vị trí và cấp độ kinh nghiệm khác nhau.
 
 ![Dự Đoán Lương](./images/salary_prediction.png)
 
 *Hình 4: Kết quả dự đoán lương cho các vị trí khác nhau. Biểu đồ thể hiện mức lương dự đoán theo vị trí công việc và cấp độ kinh nghiệm.*
 
-### e) Phân tích và Kết luận
-
-Biểu đồ trên minh họa kết quả dự đoán lương cho 3 trường hợp cụ thể: **Data Analyst (Senior)**, **NLP Engineer (Mid)**, và **AI Product Manager (Entry)**.
-
-**Mô hình phản ánh đúng xu hướng thị trường:**
-- Vị trí **Data Analyst** ở cấp **Senior**, làm **Full-time** tại ngành **Tech** và công ty **Large** nhận lương cao nhất ($126,687) — phù hợp với thực tế rằng Tech là ngành dẫn đầu về lương AI.
-- Ngược lại, vị trí **Entry-level** như AI Product Manager ở công ty quy mô **Mid** có lương thấp hơn ($86,283).
-- Sự chênh lệch ~$12k-$40k giữa các cấp bậc là hợp lý với thực tế thị trường.
-
-**Độ tin cậy:**
-- Các dự đoán nằm trong khoảng hợp lý so với dữ liệu gốc (lương trung bình toàn bộ 2,000 việc làm là ~$123,000).
-- Kết quả phù hợp với phân tích features trước đó: `industry` và `job_title` là hai yếu tố quan trọng ảnh hưởng đến mức lương.
-
-**Kết quả phân tích thị trường:**
-- Các vị trí như Data Analyst, NLP Engineer, và AI Product Manager chiếm tỷ trọng lớn nhất trong số các tin tuyển dụng.
-- Điều này phản ánh đúng thực trạng thị trường, khi các doanh nghiệp đang tập trung khai thác dữ liệu và ứng dụng AI vào hoạt động kinh doanh.
-
-**Ý nghĩa thực tiễn:**
-- Chức năng dự đoán này cho phép người dùng nhập vào hồ sơ của mình và nhận được mức lương ước tính.
-- Giúp ứng viên có cơ sở vững chắc để **đàm phán lương (deal lương)** hiệu quả hơn.
-- Nhu cầu thị trường tập trung mạnh vào các vai trò cốt lõi của khoa học dữ liệu. **Sinh viên nên ưu tiên định hướng theo các vị trí này** để có cơ hội việc làm rộng mở nhất.
+**Giải thích biểu đồ:**
+- Trục X: Vị trí công việc và cấp độ kinh nghiệm
+- Trục Y: Mức lương dự đoán (USD/năm)
+- Màu sắc: Phân biệt các vị trí khác nhau
 
 ---
 

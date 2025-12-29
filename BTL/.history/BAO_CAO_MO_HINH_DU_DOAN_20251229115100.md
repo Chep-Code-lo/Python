@@ -148,23 +148,16 @@ Sau khi chuẩn bị dữ liệu và khởi tạo mô hình ElasticNet với cá
 **Code thực hiện:**
 
 ```python
-# Khởi tạo và huấn luyện mô hình
-model = ElasticNet(alpha=0.5, l1_ratio=0.5, max_iter=10000, random_state=42)
+# Huấn luyện mô hình trên tập training
 model.fit(X_train, y_train)
 
-# Đánh giá trên tập test
+# Dự đoán lương trên tập test để đánh giá
 y_pred = model.predict(X_test)
-r2 = r2_score(y_test, y_pred)
-mae = mean_absolute_error(y_test, y_pred)
-
-# Lưu biến để sử dụng cho hàm dự đoán
-best_model = model
 ```
 
 **Giải thích:**
 - `model.fit()`: Mô hình học từ 1,600 mẫu trong tập training, tìm các hệ số tối ưu để minimize loss function
 - `model.predict()`: Sử dụng mô hình đã huấn luyện để dự đoán lương cho 400 mẫu trong tập test
-- `best_model = model`: Lưu biến model để sử dụng trong hàm `predict_salary()`
 
 ### b) Metrics đánh giá
 
@@ -305,6 +298,8 @@ Dưới đây là kết quả dự đoán cho một số trường hợp điển
 | NLP Engineer | Mid | Tech | Large | $114,316 |
 | AI Product Manager | Entry | Tech | Mid | $86,283 |
 
+**Nhận xét:** Kết quả dự đoán phản ánh đúng xu hướng thực tế - Senior có lương cao hơn Mid, Mid cao hơn Entry. Sự chênh lệch ~$12k-$28k giữa các cấp bậc là hợp lý.
+
 ### d) Biểu đồ trực quan hóa
 
 Biểu đồ cột dưới đây minh họa kết quả dự đoán lương cho 3 trường hợp điển hình, giúp người dùng dễ dàng so sánh mức lương giữa các vị trí và cấp độ kinh nghiệm khác nhau.
@@ -313,27 +308,10 @@ Biểu đồ cột dưới đây minh họa kết quả dự đoán lương cho 
 
 *Hình 4: Kết quả dự đoán lương cho các vị trí khác nhau. Biểu đồ thể hiện mức lương dự đoán theo vị trí công việc và cấp độ kinh nghiệm.*
 
-### e) Phân tích và Kết luận
-
-Biểu đồ trên minh họa kết quả dự đoán lương cho 3 trường hợp cụ thể: **Data Analyst (Senior)**, **NLP Engineer (Mid)**, và **AI Product Manager (Entry)**.
-
-**Mô hình phản ánh đúng xu hướng thị trường:**
-- Vị trí **Data Analyst** ở cấp **Senior**, làm **Full-time** tại ngành **Tech** và công ty **Large** nhận lương cao nhất ($126,687) — phù hợp với thực tế rằng Tech là ngành dẫn đầu về lương AI.
-- Ngược lại, vị trí **Entry-level** như AI Product Manager ở công ty quy mô **Mid** có lương thấp hơn ($86,283).
-- Sự chênh lệch ~$12k-$40k giữa các cấp bậc là hợp lý với thực tế thị trường.
-
-**Độ tin cậy:**
-- Các dự đoán nằm trong khoảng hợp lý so với dữ liệu gốc (lương trung bình toàn bộ 2,000 việc làm là ~$123,000).
-- Kết quả phù hợp với phân tích features trước đó: `industry` và `job_title` là hai yếu tố quan trọng ảnh hưởng đến mức lương.
-
-**Kết quả phân tích thị trường:**
-- Các vị trí như Data Analyst, NLP Engineer, và AI Product Manager chiếm tỷ trọng lớn nhất trong số các tin tuyển dụng.
-- Điều này phản ánh đúng thực trạng thị trường, khi các doanh nghiệp đang tập trung khai thác dữ liệu và ứng dụng AI vào hoạt động kinh doanh.
-
-**Ý nghĩa thực tiễn:**
-- Chức năng dự đoán này cho phép người dùng nhập vào hồ sơ của mình và nhận được mức lương ước tính.
-- Giúp ứng viên có cơ sở vững chắc để **đàm phán lương (deal lương)** hiệu quả hơn.
-- Nhu cầu thị trường tập trung mạnh vào các vai trò cốt lõi của khoa học dữ liệu. **Sinh viên nên ưu tiên định hướng theo các vị trí này** để có cơ hội việc làm rộng mở nhất.
+**Giải thích biểu đồ:**
+- Trục X: Vị trí công việc và cấp độ kinh nghiệm
+- Trục Y: Mức lương dự đoán (USD/năm)
+- Màu sắc: Phân biệt các vị trí khác nhau
 
 ---
 
